@@ -3,22 +3,48 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -r \"typed-scss-modules src --watch --exportType default\" \"next\"",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "prepare": "husky install",
+    "lint:styles": "stylelint '**/*.scss' --custom-syntax postcss-scss",
+    "lint:scripts": "eslint --ext .tsx,.ts ./src",
+    "lint": "npm run lint:scripts && npm run lint:styles",
+    "tsc": "tsc",
+    "gen:types": "typed-scss-modules src --exportType default",
+    "pre-push": "concurrently npm:tsc npm:lint:*",
+    "now-build": "npm run gen:types && next build",
+    "pull-sb-components": "storyblok pull-components --space=$(grep STORYBLOK_SPACE_ID .env | cut -d '=' -f2)",
+    "generate-sb-types": "storyblok-generate-ts source=./components.$(grep STORYBLOK_SPACE_ID .env | cut -d '=' -f2).json target=./src/typings/generated/storyblok",
+    "update-sb-types": "npm run pull-sb-components && npm run generate-sb-types"
   },
   "dependencies": {
+    "@storyblok/js": "^3.0.6",
+    "classnames": "^2.5.1",
+    "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.1.0"
+    "sass": "^1.70.0",
+    "storyblok-rich-text-react-renderer-ts": "^3.2.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@svgr/webpack": "^8.1.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "concurrently": "^8.2.2",
     "eslint": "^8",
-    "eslint-config-next": "14.1.0"
+    "eslint-config-next": "14.1.0",
+    "husky": "^9.0.10",
+    "postcss": "^8.4.33",
+    "postcss-preset-env": "^9.3.0",
+    "postcss-scss": "^4.0.9",
+    "storyblok": "^3.26.0",
+    "storyblok-generate-ts": "^2.0.1",
+    "stylelint": "^16.2.1",
+    "stylelint-config-standard": "^36.0.0",
+    "stylelint-scss": "^6.1.0",
+    "typed-scss-modules": "^8.0.0",
+    "typescript": "^5"
   }
 }
